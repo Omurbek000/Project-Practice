@@ -1,0 +1,235 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: system-ui, 'Segoe UI', 'Roboto', 'Helvetica Neue', sans-serif;
+    background: radial-gradient(circle at 10% 20%, #1a0b2e, #0a0a1a);
+    min-height: 100vh;
+    padding: 20px;
+    color: #ffffff; /* основной текст белый */
+}
+
+/* анимация свечения фона */
+body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: repeating-linear-gradient(45deg, rgba(255, 217, 102, 0.02) 0px, rgba(255, 217, 102, 0.02) 2px, transparent 2px, transparent 8px);
+    pointer-events: none;
+    z-index: 0;
+}
+
+.container {
+    max-width: 1600px; /* сделали шире */
+    margin: 0 auto;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(12px);
+    border-radius: 48px;
+    padding: 24px 20px 32px;
+    box-shadow: 0 25px 45px rgba(0,0,0,0.5), 0 0 0 1px rgba(255, 217, 102, 0.2) inset;
+    transition: all 0.3s;
+    position: relative;
+    z-index: 1;
+}
+
+h1 {
+    font-size: 2.2rem;
+    font-weight: 800;
+    text-align: center;
+    background: linear-gradient(135deg, #ffd966, #ffb347);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    text-shadow: 0 2px 5px rgba(0,0,0,0.3);
+    letter-spacing: -0.5px;
+    margin-bottom: 0.25rem;
+}
+
+.sub {
+    text-align: center;
+    color: #ffd966cc;
+    border-bottom: 1px dashed #ffd96666;
+    padding-bottom: 12px;
+    margin-bottom: 24px;
+    font-style: italic;
+}
+
+/* панели */
+.toolbar, .employee-manager {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    align-items: flex-end;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(8px);
+    padding: 16px 20px;
+    border-radius: 60px;
+    margin-bottom: 20px;
+}
+
+.date-range {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.date-range label {
+    font-weight: 600;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #ffd966;
+}
+input[type="date"] {
+    background: #1e1a2f;
+    border: 1px solid #ffd96688;
+    border-radius: 40px;
+    padding: 8px 16px;
+    color: #ffffff;
+    font-weight: 500;
+    outline: none;
+}
+input[type="date"]:focus {
+    border-color: #ffb347;
+    box-shadow: 0 0 6px #ffb347;
+}
+
+button {
+    background: linear-gradient(135deg, #4a2c6d, #2e1a47);
+    border: none;
+    color: #ffffff;
+    font-weight: bold;
+    padding: 8px 24px;
+    border-radius: 40px;
+    cursor: pointer;
+    transition: 0.2s;
+    font-size: 0.85rem;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+    border: 1px solid #ffd96666;
+}
+button:hover {
+    background: linear-gradient(135deg, #6b3fa0, #3e2363);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+    border-color: #ffd966;
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid #ffd966;
+    box-shadow: none;
+}
+.btn-reset {
+    background: linear-gradient(135deg, #7a2e2e, #4a1a1a);
+}
+.btn-add {
+    background: linear-gradient(135deg, #2a6d4c, #1a4732);
+}
+
+/* таблица - широкая, с увеличенными колонками */
+.schedule-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(4px);
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+    min-width: 800px; /* для горизонтальной прокрутки */
+}
+.schedule-table th, .schedule-table td {
+    border: 1px solid #ffd96644;
+    padding: 14px 12px;
+    text-align: center;
+    vertical-align: middle;
+}
+.schedule-table th {
+    background: #2a1a3e;
+    color: #ffd966;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    position: sticky;
+    top: 0;
+    font-size: 0.9rem;
+}
+.employee-col {
+    background: #2e1f3e;
+    font-weight: bold;
+    text-align: left;
+    position: sticky;
+    left: 0;
+    z-index: 1;
+    min-width: 180px;
+}
+.delete-employee-btn {
+    background: #aa3e3e;
+    border: none;
+    border-radius: 30px;
+    padding: 4px 10px;
+    margin-left: 12px;
+    font-size: 0.8rem;
+    color: white;
+    cursor: pointer;
+}
+.delete-employee-btn:hover {
+    background: #cc5555;
+}
+
+/* Цвета смен (полупрозрачные, чтобы текст оставался читаемым) */
+td.shift1-bg { background-color: rgba(255, 193, 7, 0.35); } /* Утро */
+td.shift2-bg { background-color: rgba(66, 153, 225, 0.35); } /* День */
+td.shift3-bg { background-color: rgba(236, 72, 153, 0.35); } /* Вечер */
+td.shift4-bg { background-color: rgba(139, 92, 246, 0.35); } /* Ночь */
+td.off-bg    { background-color: rgba(100, 100, 100, 0.35); } /* Выходной */
+
+/* Выпадающий список - белый текст на тёмном фоне */
+select {
+    width: 100%;
+    background: #1e1a2f;
+    border: 1px solid #ffd966aa;
+    border-radius: 32px;
+    padding: 8px 6px;
+    color: #ffffff;
+    font-weight: 500;
+    cursor: pointer;
+    font-size: 0.85rem;
+}
+select:focus {
+    outline: none;
+    border-color: #ffb347;
+}
+option {
+    background: #2a1a3e;
+    color: white;
+}
+
+.footer-info {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 0.8rem;
+    opacity: 0.9;
+    color: #ffd966;
+}
+
+@media (max-width: 800px) {
+    .schedule-table th, .schedule-table td {
+        padding: 10px 6px;
+    }
+    .employee-col {
+        min-width: 140px;
+    }
+    button {
+        padding: 6px 16px;
+        font-size: 0.75rem;
+    }
+    select {
+        font-size: 0.7rem;
+        padding: 6px 4px;
+    }
+}

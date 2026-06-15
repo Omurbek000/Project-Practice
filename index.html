@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>График поваров Борисевича</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+    <h1>🧑‍🍳 ГРАФИК СМЕН ПОВАРОВ БОРИСЕВИЧА</h1>
+    <div class="sub">4 смены · динамические сотрудники · сохраняется в браузере</div>
+
+    <div class="toolbar">
+        <div class="date-range">
+            <label>📅 НАЧАЛО НЕДЕЛИ</label>
+            <input type="date" id="startDate">
+        </div>
+        <button id="applyDatesBtn">ПРИМЕНИТЬ ДАТЫ (7 дней)</button>
+        <button id="saveBtn" class="btn-outline">💾 СОХРАНИТЬ</button>
+        <button id="loadBtn" class="btn-outline">📂 ЗАГРУЗИТЬ</button>
+        <button id="resetBtn" class="btn-reset">🔁 СБРОСИТЬ ВСЁ</button>
+    </div>
+
+    <div class="employee-manager">
+        <input type="text" id="newEmployeeName" placeholder="Имя нового повара">
+        <button id="addEmployeeBtn" class="btn-add">➕ ДОБАВИТЬ ПОВАРА</button>
+        <button id="resetEmployeesBtn" class="btn-outline">👥 СБРОСИТЬ СПИСОК ПО УМОЛЧАНИЮ</button>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table class="schedule-table" id="scheduleTable">
+            <thead id="tableHeader"></thead>
+            <tbody id="tableBody"></tbody>
+        </table>
+    </div>
+
+    <div class="footer-info">
+        🍽️ Смена 1 (Утро) · Смена 2 (День) · Смена 3 (Вечер) · Смена 4 (Ночь) · 🔴 Выходной
+    </div>
+</div>
+
+<script src="script.js"></script>
+</body>
+</html>
