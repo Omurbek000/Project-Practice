@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>График работы: 12 человек / 4 смены</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+        }
+
+        body {
+            background: #f0f2f5;
+            margin: 0;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            overflow-x: auto;
+            padding: 20px 16px 24px 16px;
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            margin-top: 0;
+            margin-bottom: 0.25rem;
+            color: #1e293b;
+        }
+
+        .sub {
+            color: #475569;
+            margin-bottom: 1.5rem;
+            border-left: 4px solid #3b82f6;
+            padding-left: 12px;
+        }
+
+        /* панель управления */
+        .toolbar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            margin-bottom: 24px;
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 20px;
+        }
+
+        .date-range {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .date-range label {
+            font-weight: 600;
+            font-size: 0.85rem;
+            color: #0f172a;
+        }
+
+        input[type="date"] {
+            padding: 8px 12px;
+            border-radius: 40px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.9rem;
+        }
+
+        button {
+            background: #3b82f6;
+            border: none;
+            color: white;
+            font-weight: 600;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+        }
+
+        button:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: white;
+            border: 1px solid #cbd5e1;
+            color: #1e293b;
+        }
+
+        .btn-outline:hover {
+            background: #f1f5f9;
+            border-color: #94a3b8;
+        }
+
+        .btn-reset {
+            background: #ef4444;
+        }
+
+        .btn-reset:hover {
+            background: #dc2626;
+        }
+
+        /* таблица */
+        .schedule-table {
+            border-collapse: collapse;
+            width: 100%;
+            font-size: 0.85rem;
+            box-shadow: 0 1px 2px rgba(0,0,0,0.03);
+        }
+
+        .schedule-table th, .schedule-table td {
+            border: 1px solid #e2e8f0;
+            padding: 10px 8px;
+            text-align: center;
+            vertical-align: middle;
+        }
+
+        .schedule-table th {
+            background: #f1f5f9;
+            font-weight: 600;
+            color: #0f172a;
+            position: sticky;
+            top: 0;
+            background-color: #f1f5f9;
+        }
+
+        .employee-col {
+            background-color: #fefce8;
+            font-weight: 600;
+            text-align: left;
+            position: sticky;
+            left: 0;
+            background-color: #fefce8;
+            z-index: 1;
+        }
+
+        select {
+            width: 100%;
+            padding: 8px 6px;
+            border-radius: 24px;
+            border: 1px solid #cbd5e1;
+            background: white;
+            font-size: 0.8rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 2px rgba(59,130,246,0.2);
+        }
+
+        /* отметка выходного */
+        .vacation {
+            background-color: #fee2e2;
+        }
+
+        .footer-info {
+            margin-top: 24px;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+            background: #f1f5f9;
+            padding: 12px 20px;
+            border-radius: 40px;
+            font-size: 0.8rem;
+            color: #334155;
+        }
+
+        @media (max-width: 800px) {
+            .schedule-table th, .schedule-table td {
+                padding: 6px 4px;
+            }
+            select {
+                padding: 6px 2px;
+                font-size: 0.7rem;
+            }
+            .employee-col {
+                font-size: 0.75rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📅 График смен</h1>
+    <div class="sub">12 сотрудников · 4 смены (+ выходной)</div>
+
+    <div class="toolbar">
+        <div class="date-range">
+            <label>📆 Начало недели</label>
+            <input type="date" id="startDate" value="2025-04-07">
+        </div>
+        <button id="applyDatesBtn">Применить даты (7 дней)</button>
+        <button id="saveBtn" class="btn-outline">💾 Сохранить график</button>
+        <button id="loadBtn" class="btn-outline">📂 Загрузить последний</button>
+        <button id="resetBtn" class="btn-reset">🗑 Сбросить всё</button>
+    </div>
+
+    <div style="overflow-x: auto; border-radius: 20px;">
+        <table class="schedule-table" id="scheduleTable">
+            <thead id="tableHeader">
+            </thead>
+            <tbody id="tableBody">
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer-info">
+        <span>✨ Смена 1 / Смена 2 / Смена 3 / Смена 4 — выберите для каждого сотрудника на каждый день</span>
+        <span>💡 Данные сохраняются в браузере (localStorage)</span>
+    </div>
+</div>
+
+<script>
+    // ---------- КОНФИГУРАЦИЯ ----------
+    const EMPLOYEE_COUNT = 12;
+    // Имена сотрудников (можно менять прямо в коде, или добавить редактирование)
+    const DEFAULT_EMPLOYEES = [
+        "Анна К.", "Борис Л.", "Виктор М.", "Галина П.",
+        "Дмитрий С.", "Елена В.", "Жанна К.", "Игорь Р.",
+        "Кирилл Н.", "Лариса Д.", "Михаил Т.", "Наталья Ш."
+    ];
+
+    // Доступные варианты смен (значение select, отображаемый текст)
+    const SHIFTS = [
+        { value: "shift1", label: "🚀 Смена 1" },
+        { value: "shift2", label: "⚡ Смена 2" },
+        { value: "shift3", label: "🌙 Смена 3" },
+        { value: "shift4", label: "⭐ Смена 4" },
+        { value: "off", label: "🔴 Выходной" }
+    ];
+
+    // состояние графика: schedule[employeeIndex][dayIndex] = string (value из SHIFTS)
+    let scheduleData = [];        // заполнится позже
+    let currentDates = [];        // массив строк YYYY-MM-DD
+    let employees = [...DEFAULT_EMPLOYEES];
+
+    // вспомогательная функция: инициализация чистой сетки (все выходной)
+    function initEmptySchedule(empCount, daysCount) {
+        const empty = [];
+        for (let i = 0; i < empCount; i++) {
+            empty[i] = [];
+            for (let d = 0; d < daysCount; d++) {
+                empty[i][d] = "off";   // по умолчанию выходной
+            }
+        }
+        return empty;
+    }
+
+    // сгенерировать массив дат (7 дней начиная с dateStr)
+    function generateDateRange(startStr) {
+        const startDate = new Date(startStr);
+        if (isNaN(startDate.getTime())) {
+            // если дата невалидна, берем сегодня
+            const today = new Date();
+            today.setHours(0,0,0,0);
+            return generateDateRange(today.toISOString().slice(0,10));
+        }
+        const dates = [];
+        for (let i = 0; i < 7; i++) {
+            const d = new Date(startDate);
+            d.setDate(startDate.getDate() + i);
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, '0');
+            const day = String(d.getDate()).padStart(2, '0');
+            dates.push(`${year}-${month}-${day}`);
+        }
+        return dates;
+    }
+
+    // перерисовка всей таблицы
+    function renderTable() {
+        const headerRow = document.getElementById("tableHeader");
+        const bodyContainer = document.getElementById("tableBody");
+        if (!headerRow || !bodyContainer) return;
+
+        // ---- заголовок ----
+        let theadHtml = '<tr><th class="employee-col">Сотрудник / Дата</th>';
+        for (let dayIdx = 0; dayIdx < currentDates.length; dayIdx++) {
+            const dateStr = currentDates[dayIdx];
+            // формат: день недели + число
+            const dateObj = new Date(dateStr);
+            const weekdays = ['ВС', 'ПН', 'ВТ', 'СР', 'ЧТ', 'ПТ', 'СБ'];
+            const weekday = weekdays[dateObj.getDay()];
+            const formatted = `${weekday} ${dateStr.slice(5)}`; // "ПН 04-07"
+            theadHtml += `<th>${formatted}</th>`;
+        }
+        theadHtml += '</tr>';
+        headerRow.innerHTML = theadHtml;
+
+        // ---- тело таблицы ----
+        let tbodyHtml = '';
+        for (let empIdx = 0; empIdx < employees.length; empIdx++) {
+            const empName = employees[empIdx];
+            tbodyHtml += `<tr>
+                <td class="employee-col" style="font-weight:600;">${escapeHtml(empName)}</td>`;
+            for (let dayIdx = 0; dayIdx < currentDates.length; dayIdx++) {
+                let shiftVal = (scheduleData[empIdx] && scheduleData[empIdx][dayIdx]) ? scheduleData[empIdx][dayIdx] : "off";
+                // строим select
+                let selectHtml = `<select data-emp="${empIdx}" data-day="${dayIdx}" class="shift-select">`;
+                for (let s of SHIFTS) {
+                    const selected = (shiftVal === s.value) ? 'selected' : '';
+                    selectHtml += `<option value="${s.value}" ${selected}>${s.label}</option>`;
+                }
+                selectHtml += `</select>`;
+                const isOff = (shiftVal === "off");
+                const tdClass = isOff ? 'style="background-color:#fee2e2;"' : '';
+                tbodyHtml += `<td ${tdClass}>${selectHtml}</td>`;
+            }
+            tbodyHtml += `</tr>`;
+        }
+        bodyContainer.innerHTML = tbodyHtml;
+
+        // привязать обработчики событий к селектам
+        document.querySelectorAll('.shift-select').forEach(select => {
+            select.addEventListener('change', function(e) {
+                const empIdx = parseInt(this.dataset.emp);
+                const dayIdx = parseInt(this.dataset.day);
+                const newValue = this.value;
+                if (!isNaN(empIdx) && !isNaN(dayIdx) && scheduleData[empIdx]) {
+                    scheduleData[empIdx][dayIdx] = newValue;
+                    // легкий визуальный фидбек - поменять фон ячейки (родитель td)
+                    const td = this.closest('td');
+                    if (td) {
+                        if (newValue === "off") {
+                            td.style.backgroundColor = "#fee2e2";
+                        } else {
+                            td.style.backgroundColor = "";
+                        }
+                    }
+                    // автоматическое сохранение (опционально)
+                    autoSaveToLocal();
+                }
+            });
+        });
+    }
+
+    // автосохранение в localStorage при любом изменении (опционально)
+    function autoSaveToLocal() {
+        const toStore = {
+            employees: employees,
+            dates: currentDates,
+            shiftsMatrix: scheduleData,
+            lastUpdated: new Date().toISOString()
+        };
+        localStorage.setItem("workScheduleApp", JSON.stringify(toStore));
+    }
+
+    // загрузить из localStorage
+    function loadFromLocal() {
+        const raw = localStorage.getItem("workScheduleApp");
+        if (!raw) {
+            console.log("Сохранённых данных нет");
+            return false;
+        }
+        try {
+            const data = JSON.parse(raw);
+            if (data.employees && Array.isArray(data.employees) && data.employees.length === EMPLOYEE_COUNT) {
+                employees = data.employees;
+            } else {
+                // если количество сотрудников не совпадает, используем дефолтные имена
+                employees = [...DEFAULT_EMPLOYEES];
+            }
+            if (data.dates && Array.isArray(data.dates) && data.dates.length === 7) {
+                currentDates = data.dates;
+                // синхронизировать поле ввода даты
+                if (currentDates.length) {
+                    document.getElementById("startDate").value = currentDates[0];
+                }
+            } else {
+                // если даты невалидны, генерируем заново
+                const startInput = document.getElementById("startDate").value;
+                currentDates = generateDateRange(startInput);
+            }
+            if (data.shiftsMatrix && Array.isArray(data.shiftsMatrix) && data.shiftsMatrix.length === EMPLOYEE_COUNT) {
+                scheduleData = data.shiftsMatrix;
+                // убедимся, что количество дней совпадает
+                for (let i = 0; i < scheduleData.length; i++) {
+                    if (!scheduleData[i] || scheduleData[i].length !== currentDates.length) {
+                        scheduleData[i] = [];
+                        for (let d = 0; d < currentDates.length; d++) {
+                            scheduleData[i][d] = "off";
+                        }
+                    }
+                }
+            } else {
+                // инициализация пустой сетки
+                scheduleData = initEmptySchedule(EMPLOYEE_COUNT, currentDates.length);
+            }
+            renderTable();
+            return true;
+        } catch(e) {
+            console.error("Ошибка загрузки", e);
+            return false;
+        }
+    }
+
+    // полный сброс (все выходные, имена по умолчанию, даты с начала недели)
+    function resetAll() {
+        employees = [...DEFAULT_EMPLOYEES];
+        const startInput = document.getElementById("startDate").value;
+        currentDates = generateDateRange(startInput);
+        scheduleData = initEmptySchedule(EMPLOYEE_COUNT, currentDates.length);
+        renderTable();
+        autoSaveToLocal();
+    }
+
+    // применить даты (изменить неделю, сохранить данные если возможно)
+    function applyDates() {
+        const startVal = document.getElementById("startDate").value;
+        if (!startVal) return;
+        const newDates = generateDateRange(startVal);
+        if (JSON.stringify(newDates) === JSON.stringify(currentDates)) {
+            // даты не изменились, перерисовка не нужна
+            return;
+        }
+
+        // нужно преобразовать старый график под новую размерность дней
+        const oldDates = currentDates;
+        const oldSchedule = scheduleData;
+        const newDays = newDates.length;
+
+        // новая матрица с выходными по умолчанию
+        const newSchedule = initEmptySchedule(EMPLOYEE_COUNT, newDays);
+
+        // если были старые данные, переносим смены по соответствию дат
+        if (oldDates.length && oldSchedule && oldSchedule.length === EMPLOYEE_COUNT) {
+            for (let emp = 0; emp < EMPLOYEE_COUNT; emp++) {
+                for (let oldDay = 0; oldDay < oldDates.length; oldDay++) {
+                    const oldDate = oldDates[oldDay];
+                    const newIdx = newDates.indexOf(oldDate);
+                    if (newIdx !== -1 && oldSchedule[emp] && oldSchedule[emp][oldDay] !== undefined) {
+                        newSchedule[emp][newIdx] = oldSchedule[emp][oldDay];
+                    }
+                }
+            }
+        }
+
+        scheduleData = newSchedule;
+        currentDates = newDates;
+        renderTable();
+        autoSaveToLocal();
+    }
+
+    // простая функция для экранирования HTML (имена сотрудников)
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str.replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        });
+    }
+
+    // Инициализация при загрузке страницы
+    function init() {
+        const startDateInput = document.getElementById("startDate");
+        // установить сегодняшний понедельник? чтобы было красиво
+        const today = new Date();
+        const dayOfWeek = today.getDay(); // 0 вс, 1 пн...
+        const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+        const monday = new Date(today);
+        monday.setDate(today.getDate() + mondayOffset);
+        const yyyy = monday.getFullYear();
+        const mm = String(monday.getMonth() + 1).padStart(2, '0');
+        const dd = String(monday.getDate()).padStart(2, '0');
+        const defaultMonday = `${yyyy}-${mm}-${dd}`;
+        startDateInput.value = defaultMonday;
+
+        // попробуем загрузить сохраненное
+        const loaded = loadFromLocal();
+        if (!loaded) {
+            // если нет сохранений, создаем чистый график
+            currentDates = generateDateRange(defaultMonday);
+            scheduleData = initEmptySchedule(EMPLOYEE_COUNT, currentDates.length);
+            employees = [...DEFAULT_EMPLOYEES];
+            renderTable();
+            autoSaveToLocal();
+        }
+
+        // кнопки
+        document.getElementById("applyDatesBtn").addEventListener("click", applyDates);
+        document.getElementById("saveBtn").addEventListener("click", () => {
+            autoSaveToLocal();
+            alert("✅ График сохранён в браузере");
+        });
+        document.getElementById("loadBtn").addEventListener("click", () => {
+            loadFromLocal();
+            alert("📀 График загружен из сохранения");
+        });
+        document.getElementById("resetBtn").addEventListener("click", () => {
+            if (confirm("Сбросить всех сотрудников на выходные и вернуть имена по умолчанию?")) {
+                resetAll();
+            }
+        });
+    }
+
+    // запуск
+    init();
+</script>
+</body>
+</html>
